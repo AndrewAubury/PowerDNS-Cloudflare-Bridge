@@ -9,15 +9,30 @@ zones_db = []
 
 
 def arpa_to_ip(arpa):
-    # Strip the .in-addr.arpa suffix
     if arpa.endswith(".in-addr.arpa."):
+        # Strip the .in-addr.arpa suffix
         arpa = arpa.replace(".in-addr.arpa.", "")
-    # Split the remaining string by the dots and reverse the segments
-    ip_parts = arpa.split(".")
-    ip_parts.reverse()
-    # Join the segments back into a standard IP address format
-    ip_address = ".".join(ip_parts)
-    return ip_address
+        # Split the remaining string by the dots and reverse the segments
+        ip_parts = arpa.split(".")
+        ip_parts.reverse()
+        # Join the segments back into a standard IPv4 address format
+        ip_address = ".".join(ip_parts)
+        return ip_address
+    elif arpa.endswith(".ip6.arpa."):
+        # Strip the .ip6.arpa suffix
+        arpa = arpa.replace(".ip6.arpa.", "")
+        # Split the remaining string by the dots and reverse the segments
+        ip_parts = arpa.split(".")
+        ip_parts.reverse()
+        # Join the segments back into a standard IPv6 address format
+        # Group nibbles into 4-character hextets
+        ip_address = ":".join("".join(ip_parts[i:i+4]) for i in range(0, len(ip_parts), 4))
+        # Compress the IPv6 address (remove leading zeros, etc.)
+        ip_address = ip_address.replace("0000", "0").replace("000", "").replace(":::", "::").replace("::0:", "::").replace(":0:0:0:0:", "::")
+        return ip_address
+    else:
+        return "Invalid ARPA address"
+
 
 @app.route('/api/v1/servers/localhost/zones', methods=['GET', 'POST'])
 def handle_zones():
